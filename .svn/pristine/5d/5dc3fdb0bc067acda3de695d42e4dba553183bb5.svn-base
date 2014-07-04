@@ -1,0 +1,32 @@
+package com.hqkl.net.dao;
+
+import com.hqkl.impl.HttpImpl;
+
+public class HqklHttpBack<T extends Object> implements HttpImpl<T> {
+
+	@Override
+	public void onStart() {
+		
+	}
+
+	@Override
+	public void onDown(int d, int c) {
+		
+	}
+
+	@Override
+	public void onError(Exception e) {
+		
+	}
+
+	@Override
+	public void onSuccess(Object t) {
+		
+	}
+
+	@Override
+	public void onTime(long kb) {
+		
+	}
+
+}

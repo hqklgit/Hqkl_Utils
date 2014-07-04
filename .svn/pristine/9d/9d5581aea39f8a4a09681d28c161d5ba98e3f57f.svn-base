@@ -1,0 +1,49 @@
+package com.hqkl.net.dao;
+
+import java.io.File;
+
+import com.hqkl.impl.HttpDownload;
+
+import android.annotation.SuppressLint;
+import android.os.Handler;
+import android.os.Message;
+
+public class PostHandler{
+	public static final int ON_START = 0;
+	public static final int ONRUNING = 1;
+	public static final int ONERROE = 2;
+	public static final int ONSUCCESSDOWNLOAD_FILE = 3;
+	public static final int ONSUCCESSDOWNLOAD_INPUT = 4;
+	public Handler handler;
+	HttpDownload downLoad ;
+	@SuppressLint("HandlerLeak")
+	public PostHandler(HttpDownload load) {
+		this.downLoad = load;
+		handler = new Handler(){
+			@Override
+			public void handleMessage(Message msg) {
+				super.handleMessage(msg);
+				switch (msg.what) {
+				case ON_START:
+					downLoad.onStartDownLoad();
+					break;
+				case ONERROE:
+					downLoad.onError();
+					break;
+				case ONRUNING:
+					downLoad.onDownloading(msg.arg1,msg.arg2);
+					break;
+				case ONSUCCESSDOWNLOAD_FILE:
+					downLoad.onSuccessDownLoad((File)msg.obj);
+					break;
+				case ONSUCCESSDOWNLOAD_INPUT:
+					downLoad.onSuccessDownLoad(msg.obj);
+					break;
+				default:
+					break;
+				}
+			}
+		};
+	}
+	
+}

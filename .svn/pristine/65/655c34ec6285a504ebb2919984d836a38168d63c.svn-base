@@ -1,0 +1,110 @@
+package com.hqkl.net.dao;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import android.os.Message;
+
+import com.hqkl.Utils;
+import com.hqkl.impl.HttpDownload;
+import com.hqkl.net.BasicPostValuePair;
+public class HqklDownLoad {
+	/**
+	 * 建议获取较小数据，此方法一般用于json、xml、网页、较小数据获取（get方式获取）
+	 * @param url	地址
+	 * @param download	回调事件，支持更新UI
+	 */
+	public void getDownLoad(final String url,final HttpDownload download){
+		new Thread(new Runnable() {
+			PostHandler handler = new PostHandler(download);
+			Message message = new Message();
+			@Override
+			public void run() {
+				try {
+					message.what = PostHandler.ON_START;
+					handler.handler.sendMessage(message);
+					message = new Message();
+					HttpGet  get = new HttpGet(url);
+					HttpClient client = new DefaultHttpClient();
+					HttpResponse response = client.execute(get);
+					message = new Message();
+					message.what = PostHandler.ONSUCCESSDOWNLOAD_INPUT;
+					message.obj = Utils.InputStreamTOString(response.getEntity().getContent(),"UTF-8");
+					handler.handler.sendMessage(message);
+					
+				} catch (ClientProtocolException e) {
+					message = new Message();
+					message.what = PostHandler.ONERROE;
+					handler.handler.sendMessage(message);
+				} catch (IOException e) {
+					message = new Message();
+					message.what = PostHandler.ONERROE;
+					handler.handler.sendMessage(message);
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}finally{
+					message = null;
+				}
+			}
+		}).start();
+	}
+	/**
+	 * 建议获取较小数据，此方法一般用于json、xml、网页、较小数据获取（post方式获取）
+	 * @param url	地址
+	 * @param download	回调事件，支持更新UI
+	 */
+	public void postDownLoad(final String url,final List<BasicPostValuePair> list,final Header header,final HttpDownload download){
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				Message message = new Message();
+				PostHandler handler = new PostHandler(download);
+				try {
+					HttpPost post = new HttpPost(url);
+					post.setHeader(header);
+					HttpClient client = new DefaultHttpClient();
+					post.setEntity(new UrlEncodedFormEntity(list));
+					message.what = PostHandler.ON_START;
+					handler.handler.sendMessage(message);
+					HttpResponse response = client.execute(post);
+					message = new Message();
+					message.what = PostHandler.ONSUCCESSDOWNLOAD_INPUT;
+					message.obj = Utils.InputStreamTOString(response.getEntity().getContent(),"UTF-8");
+					handler.handler.sendMessage(message);
+				} catch (UnsupportedEncodingException e) {
+					message = new Message();
+					message.what = PostHandler.ONERROE;
+					handler.handler.sendMessage(message);
+				} catch (ClientProtocolException e) {
+					message = new Message();
+					message.what = PostHandler.ONERROE;
+					handler.handler.sendMessage(message);
+				} catch (IOException e) {
+					message = new Message();
+					message.what = PostHandler.ONERROE;
+					handler.handler.sendMessage(message);
+				} catch (IllegalStateException e) {
+					message = new Message();
+					message.what = PostHandler.ONERROE;
+					handler.handler.sendMessage(message);
+				} catch (Exception e) {
+					message = new Message();
+					message.what = PostHandler.ONERROE;
+					handler.handler.sendMessage(message);
+				}				
+			}
+		}).start();
+	}
+}
